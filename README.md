@@ -8,7 +8,7 @@ A team fitness check at plan time, a persistent-specialist orchestrator at execu
 
 Two user-invocable skills:
 
-- **`writing-plans-for-teams`** — runs a four-criterion fitness check on a spec. If the work benefits from parallelism, writes a team-format plan (Wave Analysis, per-task metadata, Lifetime Plan). If not, hands off to `superpowers:writing-plans` so the serial flow continues unchanged.
+- **`writing-plans-for-teams`**: runs a four-criterion fitness check on a spec. If the work benefits from parallelism, writes a team-format plan (Wave Analysis, per-task metadata, Lifetime Plan). If not, hands off to `writing-plans` so the serial flow continues unchanged.
 - **`agent-team-driven-development`** — executes team-format plans by orchestrating persistent specialist implementers through `TeamCreate` / `SendMessage` / `TaskCreate`, running two-stage review (spec compliance, then code quality) per task, and writing a journal snapshot at completion.
 
 Together they let a single `/brainstorm` conversation fan out to a team when the feature is large enough, and collapse back to a subagent-driven flow when it isn't — with the decision made automatically by the fitness check.
@@ -17,8 +17,8 @@ Together they let a single `/brainstorm` conversation fan out to a team when the
 
 | Need | Skill to use |
 |---|---|
-| 2+ independent one-shot tasks, no shared state | `superpowers:dispatching-parallel-agents` |
-| Serial plan, one role, tight dependency chain | `superpowers:subagent-driven-development` |
+| 2+ independent one-shot tasks, no shared state | `dispatching-parallel-agents` |
+| Serial plan, one role, tight dependency chain | `subagent-driven-development` |
 | 4+ tasks across 2+ waves with role specialization and cross-task context | **`superpowered-teams:agent-team-driven-development`** |
 | Mechanical fan-out / map-reduce over independent units, no inter-agent talk | the **Workflow** tool (not a skill; see next section) |
 
@@ -36,19 +36,19 @@ They compose, and this plugin is itself a hybrid: implementer roles are persiste
 
 - Claude Code **≥ 2.1.32** (hard floor: Agent Teams introduced). **Recommended ≥ 2.1.147** so `CLAUDE_CODE_SUBAGENT_MODEL` applies to teammate processes, which is what keeps teammates on your intended Opus tier.
 - `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `~/.claude/settings.json`
-- [**superpowers**](https://github.com/obra/superpowers) plugin installed (hard dependency, see below)
+- Companion planning/execution skills available under their unprefixed names: the [**superpowers**](https://github.com/obra/superpowers) plugin, or your own local equivalents (see below)
 
-### Why superpowers is required
+### Companion skills
 
-`superpowered-teams` is a superpowers extension. It invokes:
+`superpowered-teams` hands off to companion skills by their unprefixed names, so it works whether those skills come from the superpowers plugin or from your own local equivalents (a homebrew `writing-plans`, `subagent-driven-development`, etc.). If yours live under the superpowers plugin namespace, read each name below as `superpowers:<name>`. It invokes:
 
-- `superpowers:writing-plans` — fallback when fitness check fails
-- `superpowers:subagent-driven-development` — target of the fallback handoff for executors
-- `superpowers:finishing-a-development-branch` — post-team completion handoff
+- `writing-plans` (or your superpowers equivalent): fallback when fitness check fails
+- `subagent-driven-development` (or your superpowers equivalent): target of the fallback handoff for executors
+- `finishing-a-development-branch` (or your superpowers equivalent): post-team completion handoff
 
 Soft references (documented, used as concept pointers):
 
-- `superpowers:brainstorming`, `superpowers:using-git-worktrees`, `superpowers:test-driven-development`, `superpowers:requesting-code-review`
+- `brainstorming`, `using-git-worktrees`, `test-driven-development`, `requesting-code-review`
 
 Code quality review (per task and final) uses this plugin's own `superpowered-teams:code-reviewer` agent — no superpowers dependency for review.
 
@@ -78,7 +78,7 @@ Not yet submitted to the `claude-plugins-official` marketplace. Use Option A for
 
 ### Required post-install step
 
-**The plugin's skills are underused without this step.** By default `superpowers:brainstorming` hands off to `superpowers:writing-plans` at its terminal state, which skips the team fitness check entirely. Add the snippet from [`claude-md-snippet.md`](./claude-md-snippet.md) to your global CLAUDE.md to route brainstorming through `writing-plans-for-teams` instead:
+**The plugin's skills are underused without this step.** By default `brainstorming` hands off to `writing-plans` at its terminal state, which skips the team fitness check entirely. Add the snippet from [`claude-md-snippet.md`](./claude-md-snippet.md) to your global CLAUDE.md to route brainstorming through `writing-plans-for-teams` instead:
 
 ```bash
 cat ~/.claude/plugins/user/superpowered-teams/claude-md-snippet.md >> ~/.claude/CLAUDE.md
@@ -92,9 +92,9 @@ Or copy the contents of `claude-md-snippet.md` manually. The snippet is intentio
 
 Start a new conversation and say: *"let's brainstorm a small feature."*
 
-- `superpowers:brainstorming` activates
+- `brainstorming` activates
 - At the end, it should hand off to `superpowered-teams:writing-plans-for-teams`
-- Run the fitness check — for a trivially serial spec, it will fall back to `superpowers:writing-plans` (no team plan produced)
+- Run the fitness check: for a trivially serial spec, it will fall back to `writing-plans` (no team plan produced)
 - For a spec with multiple waves and roles, it will produce a team-format plan and offer Agent Team-Driven execution
 
 ## The fitness check
@@ -108,7 +108,7 @@ Before `writing-plans-for-teams` writes any tasks, it evaluates:
 | Distinct specialist roles | ≥ 2 |
 | No pervasive shared state across tasks | judgment |
 
-**All four must hold.** If any fails, the skill announces the failure and invokes `superpowers:writing-plans` as a sub-skill — producing a standard serial plan. This gate exists because team overhead (setup, coordination, review loops) is real; parallelism only pays off at a certain scale.
+**All four must hold.** If any fails, the skill announces the failure and invokes `writing-plans` as a sub-skill; producing a standard serial plan. This gate exists because team overhead (setup, coordination, review loops) is real; parallelism only pays off at a certain scale.
 
 ## Team architecture
 

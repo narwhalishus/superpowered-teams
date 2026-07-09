@@ -1,13 +1,13 @@
 ---
 name: writing-plans-for-teams
-description: Use when you have a spec or requirements for a multi-step task that may benefit from parallel team execution, before touching code. Runs a fitness check and either produces a team-format plan or hands off to superpowers:writing-plans.
+description: Use when you have a spec or requirements for a multi-step task that may benefit from parallel team execution, before touching code. Runs a fitness check and either produces a team-format plan or hands off to writing-plans.
 ---
 
 # Writing Plans for Teams
 
 ## Overview
 
-Write implementation plans designed for parallel execution by a team of persistent specialist agents coordinated by a Lead through Claude Code's Agent Teams feature. Before drafting task content, run a fitness check; if the plan doesn't benefit from team execution, hand off to `superpowers:writing-plans` immediately.
+Write implementation plans designed for parallel execution by a team of persistent specialist agents coordinated by a Lead through Claude Code's Agent Teams feature. Before drafting task content, run a fitness check; if the plan doesn't benefit from team execution, hand off to `writing-plans` immediately.
 
 Assume implementers are skilled developers with zero codebase context. Document everything: which files to touch, complete code, testing commands, dependency relationships, and what each task produces for later tasks. DRY. YAGNI. TDD. Frequent commits.
 
@@ -20,14 +20,16 @@ Assume implementers are skilled developers with zero codebase context. Document 
 
 ## The Process
 
+Companion-skill names in this skill (`writing-plans`, `subagent-driven-development`) are unprefixed: resolve each to your local skill of that name, or its superpowers-plugin equivalent (`superpowers:<name>`) if that is where yours lives.
+
 1. Draft the task list and dependency graph (no code or file paths yet — just what are the tasks and what depends on what)
 2. Run the fitness check
-3. If it fails, hand off to `superpowers:writing-plans` immediately
+3. If it fails, hand off to `writing-plans` immediately
 4. If it passes, write the full team-format plan
 
 ## Fitness Check
 
-**Scope of this gate (read first).** The four-criterion check below is the **build-team** gate: it decides whether a multi-task, multi-wave *build* should run as a persistent specialist team versus a serial subagent chain. It is NOT the gate for a **deliberation team** (2+ conflicting expert lenses cross-challenging to converge on one contested decision). A deliberation team is count-free, needs no spec and no written plan (the deliberation IS the design work), and is reached at intake time per the `task-routing` skill's deliberation track. It never arrives here. If you find yourself failing a decision/design question against the >=4-task / >=2-wave thresholds, STOP: you are applying the build gate to a deliberation, which is the documented mis-route. Send it back to the deliberation track, do not hand it to `superpowers:writing-plans`.
+**Scope of this gate (read first).** The four-criterion check below is the **build-team** gate: it decides whether a multi-task, multi-wave *build* should run as a persistent specialist team versus a serial subagent chain. It is NOT the gate for a **deliberation team** (2+ conflicting expert lenses cross-challenging to converge on one contested decision). A deliberation team is count-free, needs no spec and no written plan (the deliberation IS the design work), and is reached at intake time per the `task-routing` skill's deliberation track. It never arrives here. If you find yourself failing a decision/design question against the >=4-task / >=2-wave thresholds, STOP: you are applying the build gate to a deliberation, which is the documented mis-route. Send it back to the deliberation track, do not hand it to `writing-plans`.
 
 **Pre-check (shape):** before the four-criterion gate, ask one question. Is this mechanical fan-out over independent units with no cross-task deliberation (apply the same transform to N files, score N candidates against one rubric, run parallel verifiers, extract structured data from N documents)? If yes, this is **Workflow-shaped**, not team-shaped: a persistent specialist team adds coordination overhead it cannot repay when the units never talk to each other, and a serial subagent chain wastes the parallelism. Recommend the `Workflow` tool instead (and note that under ultracode the session will tend to author one by default). This stays advisory: surface the recommendation in your announce text, do not hand off to a third skill. A genuine team-shaped BUILD plan (specialists carrying context across waves, reconciling module boundaries) proceeds to the four-criterion gate below.
 
@@ -42,9 +44,9 @@ All four criteria must hold. If ANY fails, hand off.
 
 **If any fail:**
 
-Announce to user: *"After analyzing dependencies, this plan is [reason: e.g., only 3 tasks / a serial chain / single specialist / heavy shared state]. Team overhead wouldn't pay off. Switching to superpowers:writing-plans with subagent-driven execution."*
+Announce to user: *"After analyzing dependencies, this plan is [reason: e.g., only 3 tasks / a serial chain / single specialist / heavy shared state]. Team overhead wouldn't pay off. Switching to writing-plans with subagent-driven execution."*
 
-Then invoke `superpowers:writing-plans` as the sub-skill. Do not attempt to draft a team-format plan and convert.
+Then invoke `writing-plans` as the sub-skill. Do not attempt to draft a team-format plan and convert.
 
 ## Plan Document Header
 
@@ -178,7 +180,7 @@ git commit -m "feat(shared): add UserPreferencesSchema"
 
 ## Bite-Sized Task Granularity
 
-Same as `superpowers:writing-plans` — each step is one action (2-5 minutes). Write failing test, verify fails, minimal implementation, verify passes, commit.
+Same as `writing-plans`; each step is one action (2-5 minutes). Write failing test, verify fails, minimal implementation, verify passes, commit.
 
 ## No Placeholders
 
@@ -202,7 +204,7 @@ Every step must contain actual content. These are plan failures:
 
 ## Self-Review
 
-After writing the complete plan, run the standard `superpowers:writing-plans` self-review checklist (spec coverage, placeholder scan, type consistency) plus three team-specific checks:
+After writing the complete plan, run the standard `writing-plans` self-review checklist (spec coverage, placeholder scan, type consistency) plus three team-specific checks:
 
 1. **Wave grouping safety** — for each same-wave pair, confirm no file overlap and no import relationship
 2. **Task metadata completeness** — every task has Specialist, Depends on, and Produces fields
@@ -228,5 +230,5 @@ After saving the plan, present:
 - Lead spawns specialists, orchestrates waves, runs reviews
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use `superpowers:subagent-driven-development`
+- **REQUIRED SUB-SKILL:** Use `subagent-driven-development`
 - Fresh subagent per task, serial execution

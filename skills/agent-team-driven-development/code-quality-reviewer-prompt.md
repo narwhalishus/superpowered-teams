@@ -47,7 +47,7 @@ Agent tool:
 
     ## Report Format
 
-    Follow the `superpowers:requesting-code-review` methodology for the review itself. For the report format, use exactly the structure below (it takes precedence over any conflicting format guidance from that skill).
+    Follow the `requesting-code-review` methodology for the review itself. For the report format, use exactly the structure below (it takes precedence over any conflicting format guidance from that skill).
     Use file:line references throughout so the lead can forward your
     report verbatim to the implementer.
 

@@ -29,13 +29,15 @@ If a required primitive is unavailable at boot, halt and direct the user to `upd
 
 ## When to Use
 
+Companion-skill names in this skill (`writing-plans`, `subagent-driven-development`, `finishing-a-development-branch`, `test-driven-development`, `requesting-code-review`) are unprefixed: resolve each to your local skill of that name, or its superpowers-plugin equivalent (`superpowers:<name>`) if that is where yours lives.
+
 - Plan was written by `writing-plans-for-teams` (blockquote verifies this)
 - Tasks have identifiable independence across at least 2 waves
 - 4+ tasks total
 - 2+ distinct specialist roles
 
 **Don't use when:**
-- Plan was written by `superpowers:writing-plans` (use `superpowers:subagent-driven-development` instead)
+- Plan was written by `writing-plans` (use `subagent-driven-development` instead)
 - Plan is serial or tightly coupled (fitness check should have routed you elsewhere)
 - The work is mechanical fan-out over independent units with no inter-agent deliberation (map/reduce, parallel verify, schema-forced extraction). That is Workflow-shaped: use the `Workflow` tool, not a team. This skill is the persistence and deliberation primitive; the two compose (a Workflow can call this plugin's `superpowered-teams:code-reviewer` agent), but team orchestration is lead-session-driven, not workflow-driven. Under ultracode, a session may author such a Workflow by default; that does not replace this skill for genuine team-shaped plans.
 
@@ -81,7 +83,7 @@ Two failure modes can make the lead act on stale directives. Guard against both.
 ### Phase 1 — Boot
 
 1. Read plan file end-to-end. Extract tasks, Specialists table, Waves, Dependency Graph, Lifetime Plan.
-2. Verify the plan's `> **For agentic workers:**` blockquote names `agent-team-driven-development`. **Scope the check to blockquote lines only** (lines beginning with `>`) — e.g., `grep -E "^>.*agent-team-driven-development" <planfile>`. A plan that merely mentions the skill name in prose (Goal/Architecture/Tech Stack/task text) must NOT pass this check; only the blockquote's named sub-skill counts. If the blockquote is absent or names a different skill (e.g., `superpowers:subagent-driven-development`, `superpowers:executing-plans`), halt: *"This plan was written for a different execution model — re-run `writing-plans-for-teams` or use the skill the blockquote names."*
+2. Verify the plan's `> **For agentic workers:**` blockquote names `agent-team-driven-development`. **Scope the check to blockquote lines only** (lines beginning with `>`); e.g., `grep -E "^>.*agent-team-driven-development" <planfile>`. A plan that merely mentions the skill name in prose (Goal/Architecture/Tech Stack/task text) must NOT pass this check; only the blockquote's named sub-skill counts. If the blockquote is absent or names a different skill (e.g., `subagent-driven-development`, `executing-plans`), halt: *"This plan was written for a different execution model; re-run `writing-plans-for-teams` or use the skill the blockquote names."*
 3. Verify environment matches § Compatibility (experimental flag for Agent Teams in user settings, CC version meeting the documented minimum, required primitives available). Halt with remediation pointing to `update-config` skill if any prerequisite is missing.
 4. Verify git worktree if the plan modifies code (skip for docs-only plans). Halt if on `main`/`master` without explicit user consent.
 5. `TeamCreate` with `team_name: <plan-slug>` (derived from plan filename), `agent_type: "lead"`, and `description` set to plan's Goal line. Verify team creation succeeded before proceeding; on failure, apply the slug-collision recovery from Error Handling.
@@ -166,7 +168,7 @@ Before kicking off Wave N+1:
 4. **`TeamDelete` is blocked until the journal snapshot file exists.** Verify file exists before proceeding.
 5. Shutdown live teammates: `SendMessage` with `{"type": "shutdown_request"}` to each.
 6. `TeamDelete` after all teammates confirm shutdown. If a teammate doesn't respond to `shutdown_request` within a reasonable window, proceed only if `TeamDelete` succeeds (indicating no active members); if it fails per the "active members" path in Error Handling, recover before retrying.
-7. Invoke `superpowers:finishing-a-development-branch` as sub-skill.
+7. Invoke `finishing-a-development-branch` as sub-skill.
 
 ## Status Protocol
 
@@ -345,17 +347,17 @@ Accumulated reviewer prose is within working range at the documented model tier 
 ## Integration
 
 **Upstream:**
-- `superpowers:brainstorming` → produces spec consumed by `writing-plans-for-teams`
+- `brainstorming` → produces spec consumed by `writing-plans-for-teams`
 - `writing-plans-for-teams` → produces plan this skill executes
-- `superpowers:using-git-worktrees` → required if team will modify code
+- `using-git-worktrees` → required if team will modify code
 
 **Peers:**
-- `superpowers:subagent-driven-development` → serial alternative for plans that don't pass fitness check
+- `subagent-driven-development` → serial alternative for plans that don't pass fitness check
 
 **Invoked as sub-skills:**
-- `superpowers:test-driven-development` → implementer prompts reference this
+- `test-driven-development` → implementer prompts reference this
 - `superpowered-teams:code-reviewer` (this plugin's agent) → code quality review and final review
-- `superpowers:requesting-code-review` → review methodology
+- `requesting-code-review` → review methodology
 
 **Downstream:**
-- `superpowers:finishing-a-development-branch` → merge/PR/cleanup after `TeamDelete`
+- `finishing-a-development-branch` → merge/PR/cleanup after `TeamDelete`
